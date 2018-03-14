@@ -17,13 +17,15 @@ ENV GITLAB_ZH_GIT=https://gitlab.com/xhang/gitlab.git
 ENV SOURCE_BRANCH=${GITLAB_VERSION}
 ENV TARGET_BRANCH=${GITLAB_VERSION}-zh
 
-# Reference: https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/config/software/gitlab-rails.rb
+# Reference:
+# * https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/config/software/gitlab-rails.rb
+# * https://gitlab.com/gitlab-org/gitlab-ce/blob/master/.gitlab-ci.yml
 RUN set -xe \
     && echo " # Preparing ..." \
     && export DEBIAN_FRONTEND=noninteractive \
     && export SSL_CERT_DIR=/etc/ssl/certs/ \
     && export GIT_SSL_CAPATH=/etc/ssl/certs/ \
-    && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+    && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
@@ -46,8 +48,6 @@ RUN set -xe \
     && cp config/database.yml.postgresql config/database.yml \
     && cp config/secrets.yml.example config/secrets.yml \
     && rm -rf public/assets \
-    && rm -rf yarn.lock node_modules \
-    && yarn install \
     && export NODE_ENV=production \
     && export RAILS_ENV=production \
     && export SETUP_DB=false \
@@ -56,6 +56,7 @@ RUN set -xe \
     && export WEBPACK_REPORT=true \
     && export NO_COMPRESSION=true \
     && export NO_PRIVILEGE_DROP=true \
+    && yarn install --frozen-lockfile \
     && bundle exec rake gettext:compile \
     && bundle exec rake gitlab:assets:compile \
     && echo " # Cleaning ..." \
